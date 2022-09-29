@@ -1,0 +1,89 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+green='\033[0;32m'
+y='\033[0;33m'
+NC='\033[0m' # No Color
+#Total RAM USAGE
+TOTAL_RAM=`free -m | awk '{print  $2/1024}'| awk '{printf("%.2f \n",$1)}' | head -2 | tail -1`
+USED_RAM=`free -m | awk '{print  $3/1024}'| awk '{printf("%.2f \n",$1)}' | head -2 | tail -1`
+ 
+ 
+#FRE RAM USAGE
+FREE_RAM=`free -m | awk '{print $4}'| head -3| tail -1`
+ 
+ 
+
+if [ "$1" = "start" ]; then
+
+    if pgrep app >/dev/null 2>&1
+        then
+            
+                echo -e "Negalima paleisti nes jau veikia!"
+        else
+            screen -d -m -L -S app ./app
+            echo -e "Serveris paleistas"
+        fi
+   
+elif [ "$1" = "stop" ]; then
+  
+
+     if pgrep app >/dev/null 2>&1
+        then
+            
+              killall app
+             echo -e "Serveris sustabdytas"
+
+        else
+            echo -e "Serveris jau sustabdytas"
+        fi
+elif [ "$1" = "r" ]; then
+    if pgrep app >/dev/null 2>&1
+    then
+            killall app
+            screen -d -m -L -S app ./app
+            echo -e "Serveris perkrautas"
+    else
+        echo -e "Serveris nėra pajungtas"
+    fi
+elif [ "$1" = "screen" ]; then
+    if pgrep app >/dev/null 2>&1
+    then
+        screen -r app  
+            
+    else
+        echo -e "Serveris nėra pajungtas"
+    fi
+elif [ "$1" = "update" ]; then
+    if pgrep app >/dev/null 2>&1
+    then
+        killall app
+        ./update.sh
+    else
+       ./update.sh
+        
+    fi
+elif [ "$1" = "stats" ]; then
+  if pgrep app >/dev/null 2>&1
+    then
+       echo "Online"
+    else
+       echo "Offline"
+        
+    fi
+
+elif [ "$1" = "sys" ]; then
+
+echo "CPU: "$[100-$(vmstat 1 2|tail -1|awk '{print $15}')]"%"
+echo "RAM: " $USED_RAM "/" $TOTAL_RAM "GB" 
+elif [ "$1" = "status" ]; then
+    if pgrep app >/dev/null 2>&1
+        then
+            echo "[Status]Tinkle"
+        else
+            echo "[Status]Išjungtas"
+            
+        fi 
+else
+  echo -e "${green}./server ${y}start|stop|r|update|screen${NC}"
+fi
